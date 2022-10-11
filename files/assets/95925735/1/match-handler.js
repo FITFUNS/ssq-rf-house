@@ -297,27 +297,9 @@ class MatchHandler extends pc.ScriptType {
       }
 
       this._matchHandler.script.inputManager.inputTarget = inst;
-      window.parent.postMessage(
-        {
-          type: "player#join",
-          user_id: data.user_id,
-          display_name: decodeURIComponent(window.atob(data.display_name)),
-          self: true,
-        },
-        "*"
-      );
     } else {
       if (this.playerMap.get(data.user_id)) return;
       this.spawnPlayer(data, false);
-      window.parent.postMessage(
-        {
-          type: "player#join",
-          user_id: data.user_id,
-          display_name: decodeURIComponent(window.atob(data.display_name)),
-          self: false,
-        },
-        "*"
-      );
     }
   }
 
@@ -346,7 +328,6 @@ class MatchHandler extends pc.ScriptType {
   }
 
   onPlayerCollectItem(match_id, op_code, data, presence, match) {
-    console.log('data', data);
     this.app.objectManager.destroy(data.oid);
   }
 
@@ -450,17 +431,6 @@ class MatchHandler extends pc.ScriptType {
     for (const playerInfo of players) {
       if (playerInfo.user_id !== accountUserId) {
         this.spawnPlayer(playerInfo, false);
-        window.parent.postMessage(
-          {
-            type: "player#join",
-            user_id: playerInfo.user_id,
-            display_name: decodeURIComponent(
-              window.atob(playerInfo.display_name)
-            ),
-            self: false,
-          },
-          "*"
-        );
       }
     }
   }
@@ -508,10 +478,6 @@ class MatchHandler extends pc.ScriptType {
   destroyPlayer(user_id) {
     const player = this.playerMap.get(user_id);
     if (player) {
-      window.parent.postMessage(
-        { type: "player#leave", user_id: user_id },
-        "*"
-      );
       this.playerMap.delete(user_id);
       setTimeout((p) => p.destroy(), 0, player);
     }
