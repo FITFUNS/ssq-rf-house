@@ -275,10 +275,14 @@ class MatchHandler extends pc.ScriptType {
     this.spawnObjectBatch(data.objects);
     setTimeout(async () => {
       const account = await this.nakamaMatch.Account.get();
+      const metadata = JSON.parse(account.user.metadata);
+      console.log("account", account);
       const char_type = getRandomInt(0, 5);
       await this.sendMatchState(this.opCode.PLAYER_SPAWN, {
         user_id: account.user_id,
         char_type: char_type,
+        level: metadata.level ? metadata.level : 1,
+        house_owner: metadata.house_owner ? 1 : 0,
         display_name: window.btoa(
           encodeURIComponent(account.user.display_name)
         ),
@@ -458,6 +462,8 @@ class MatchHandler extends pc.ScriptType {
       window.atob(playerInfo.display_name)
     );
     inst.tags.add("player");
+    inst.house_owner = playerInfo.house_owner;
+    inst.level = playerInfo.level;
     this.playerMap.set(playerInfo.user_id, inst);
     if (playerInfo.pos) {
       const pos = int2float(playerInfo.pos);

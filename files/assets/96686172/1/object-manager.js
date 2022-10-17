@@ -15,7 +15,7 @@ class ObjectManager extends pc.ScriptType {
 
   spawn(object) {
     const template = this.item_config.find(
-      (el) => el.item.name === "living_bed_02_double"
+      (el) => el.item.name === object.type
     );
     const pos = object.pos;
     const inst = template.item.resource.instantiate();
