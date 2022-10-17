@@ -125,7 +125,8 @@ class MatchHandler extends pc.ScriptType {
       data.type !== "house_init" &&
       data.type !== "house_chat" &&
       data.type !== "house_rotate_item" &&
-      data.type !== "house_collect_item"
+      data.type !== "house_collect_item" &&
+      data.type !== "get_match_info"
     )
       return;
     switch (data.type) {
@@ -140,6 +141,9 @@ class MatchHandler extends pc.ScriptType {
         break;
       case "house_collect_item":
         this.sendCollectHouseItem(data.oid);
+        break;
+      case "get_match_info":
+        this.onGetMatchInfo();
         break;
       default:
         break;
@@ -276,7 +280,6 @@ class MatchHandler extends pc.ScriptType {
     setTimeout(async () => {
       const account = await this.nakamaMatch.Account.get();
       const metadata = JSON.parse(account.user.metadata);
-      console.log("account", account);
       const char_type = getRandomInt(0, 5);
       await this.sendMatchState(this.opCode.PLAYER_SPAWN, {
         user_id: account.user_id,
@@ -342,6 +345,20 @@ class MatchHandler extends pc.ScriptType {
       data,
       presences
     );
+  }
+  onGetMatchInfo() {
+    const temp = [];
+    this.playerMap.forEach((player) => {
+      const info = {
+        display_name: player.display_name,
+        user_id: player.name,
+        title: player.title ? player.title : null,
+        house_owner: player.house_owner ? 1 : 0,
+        level: player.level ? player.level : 1,
+      };
+      temp.push(info);
+    });
+    window.parent.postMessage({ type: "get_match_info", info: temp }, "*");
   }
 
   sendPlayerMove(t_pos, ext = false) {
