@@ -1,4 +1,4 @@
-ASSET_PREFIX = "https://d3jx5aftp1ocpc.cloudfront.net/house/";
+ASSET_PREFIX = "https://d21dwkz3c8rdvf.cloudfront.net/house/";
 SCRIPT_PREFIX = "";
 SCENE_PATH = "1488900.json";
 CONTEXT_OPTIONS = {
