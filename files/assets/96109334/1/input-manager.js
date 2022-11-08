@@ -45,11 +45,7 @@ class InputManager extends pc.ScriptType {
     raycastResults = raycastResults.filter(
       (result) =>
         result.point.distance(this.app.matchHandler.localPlayer.getPosition()) <
-<<<<<<< HEAD
           20 && !result.entity.tags.has("prevent_raycast") && !result.entity.tags.has("house_item")
-=======
-        20 && !result.entity.tags.has("prevent_raycast")
->>>>>>> 4e0931ba864bf486cd26330c63e256fadef42974
     );
     if (raycastResults[0] && raycastResults[0].entity.tags.has("self"))
       raycastResults.splice(0, 1);
