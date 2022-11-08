@@ -45,7 +45,7 @@ class InputManager extends pc.ScriptType {
     raycastResults = raycastResults.filter(
       (result) =>
         result.point.distance(this.app.matchHandler.localPlayer.getPosition()) <
-          20 && !result.entity.tags.has("prevent_raycast")
+        20 && !result.entity.tags.has("prevent_raycast")
     );
     if (raycastResults[0] && raycastResults[0].entity.tags.has("self"))
       raycastResults.splice(0, 1);
@@ -81,13 +81,17 @@ class InputManager extends pc.ScriptType {
         200
       );
       let raycastResult = this.app.systems.rigidbody.raycastFirst(start, end);
+
       if (!raycastResult) return;
+      if (!raycastResult.entity.setter) return;
+
       if (
-        raycastResult.entity.tags.has("house_item") &&
-        this.inputTarget.name === raycastResult.entity.setter
+        raycastResult.entity.tags.has("house_item")
+        && (this.inputTarget.name === raycastResult.entity.setter
+          || this.inputTarget.name === this.ownerId)
       ) {
-        const uiPivot = raycastResult.entity.findByTag("ui_pivot")[0];
-        const uiPosition = this._raycastCamera.worldToScreen(
+          const uiPivot = raycastResult.entity.findByTag("ui_pivot")[0];
+          const uiPosition = this._raycastCamera.worldToScreen(
           uiPivot.getPosition()
         );
         window.parent.postMessage(
@@ -132,7 +136,8 @@ class InputManager extends pc.ScriptType {
   onMessage(message) {
     if (
       message.data.type !== "house_select_item" &&
-      message.data.type !== "house_collect_item"
+      message.data.type !== "house_collect_item" &&
+      message.data.type !== "house_init"
     )
       return;
     const data = message.data;
@@ -152,6 +157,9 @@ class InputManager extends pc.ScriptType {
         this.selected_item = null;
         if (data.bool) this.isHouseEditting = true;
         else this.isHouseEditting = false;
+        break;
+      case "house_init":
+        this.ownerId = data.owner_id;
         break;
       default:
         break;
