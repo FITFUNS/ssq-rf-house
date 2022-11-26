@@ -168,16 +168,26 @@ class MatchHandler extends pc.ScriptType {
         protobuf = true;
 
         const drv = new ffnet.NetDriver();
-
         const cid = data.custom_id;
         const username = data.username;
-        drv.initialize(this.app, {
-          host: host,
-          port: port,
-          serverkey: serverkey,
-          useSSL: useSSL,
-        });
-        if (!(await drv.authenticate({ cid: cid }, true, username))) continue;
+        drv.initialize(
+          this.app,
+          {
+            host: host,
+            port: port,
+            serverkey: serverkey,
+            useSSL: useSSL,
+          },
+          "match"
+        );
+        if (
+          !(await drv.authenticate(
+            { cid: cid, session_key: data.session_key },
+            true,
+            username
+          ))
+        )
+          continue;
         if (!(await drv.connect(useSSL, verbose, protobuf))) continue;
 
         const searchResult = await drv.gameplay.createMatch(
