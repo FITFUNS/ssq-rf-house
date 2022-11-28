@@ -62,6 +62,8 @@ class MatchHandler extends pc.ScriptType {
     this.app.matchHandler = this;
     window.addEventListener("message", this.onMessage.bind(this));
     window.parent.postMessage({ type: "request_house_init" }, "*");
+    this.name_screen = this.app.root.findByName("name_screen");
+    this.nameTag = this.name_screen.children[0];
 
     this.on("destroy", () => {
       window.removeEventListener("message", this.onMessage.bind(this));
@@ -117,6 +119,26 @@ class MatchHandler extends pc.ScriptType {
       });
       this._matchData.length = 0;
     }
+    this.playerMap.forEach((player) => {
+      if (!player.name_pivot) return;
+      const pos = this._mainCamera.camera.worldToScreen(
+        player.name_pivot.getPosition()
+      );
+      pos.x *= this.app.graphicsDevice.maxPixelRatio;
+      pos.y *= this.app.graphicsDevice.maxPixelRatio;
+      pos.y = this.name_screen.screen.resolution.y - pos.y;
+      if (pos.z < 0) {
+        player.nameTag.enabled = false;
+      } else {
+        if (!this.localPlayer) return;
+        if (player.getPosition().distance(this.localPlayer.getPosition()) > 5) {
+          player.nameTag.enabled = false;
+          return;
+        }
+        player.nameTag.enabled = true;
+        player.nameTag.setLocalPosition(pos);
+      }
+    });
   }
 
   onMessage(message) {
@@ -152,6 +174,9 @@ class MatchHandler extends pc.ScriptType {
 
   onHouseInit(data) {
     const matchConfig = data.matchConfig;
+    this.name_screen.enabled = true;
+    this.nameTag.children[0].element.text = data.display_name;
+    this.nameTag.element.width = this.nameTag.children[0].element.width + 36;
     (async () => {
       const matchs = matchConfig.scenes[this.matchName];
       let serverkey = "";
@@ -221,6 +246,7 @@ class MatchHandler extends pc.ScriptType {
       );
 
       this.match_owner = data.owner_id;
+      this.match_displayname = data.display_name;
     })();
   }
 
@@ -452,6 +478,7 @@ class MatchHandler extends pc.ScriptType {
 
     if (leaves && leaves.length > 0) {
       leaves.forEach((player) => {
+        player.nameTag.destroy();
         this.destroyPlayer(player.user_id);
       });
     }
@@ -478,7 +505,9 @@ class MatchHandler extends pc.ScriptType {
     const inst = this.player_root.instantiate();
     const modelInst = this.player_model.instantiate();
     modelInst.name = "spawn_model";
-    let modelAsset = this.select_char[playerInfo.char_type].model;
+    let modelAsset = Number(playerInfo.char_type)
+      ? this.select_char[playerInfo.char_type].model
+      : this.select_char[0].model;
     if (modelAsset) {
       if (!modelAsset.loaded) this.app.assets.load(modelAsset);
       modelInst.model.asset = modelAsset;
@@ -491,6 +520,7 @@ class MatchHandler extends pc.ScriptType {
     inst.tags.add("player");
     inst.house_owner = playerInfo.house_owner;
     inst.level = playerInfo.level;
+    inst.name_pivot = inst.findByTag("name_pos")[0];
     this.playerMap.set(playerInfo.user_id, inst);
     if (playerInfo.pos) {
       const pos = int2float(playerInfo.pos);
@@ -502,7 +532,14 @@ class MatchHandler extends pc.ScriptType {
     }
 
     if (self) {
+      inst.nameTag = this.nameTag;
       inst.tags.add("self");
+    } else {
+      inst.nameTag = this.nameTag.clone();
+      inst.nameTag.findByName("Text").element.text = inst.display_name;
+      inst.nameTag.element.width =
+        inst.nameTag.findByName("Text").element.width + 36;
+      this.name_screen.addChild(inst.nameTag);
     }
     this._root.addChild(inst);
     return inst;
