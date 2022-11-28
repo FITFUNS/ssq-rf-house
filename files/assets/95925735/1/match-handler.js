@@ -478,7 +478,9 @@ class MatchHandler extends pc.ScriptType {
     const inst = this.player_root.instantiate();
     const modelInst = this.player_model.instantiate();
     modelInst.name = "spawn_model";
-    let modelAsset = this.select_char[playerInfo.char_type].model;
+    let modelAsset = Number(playerInfo.avatar_url)
+      ? this.app.gameManager.select_char[playerInfo.avatar_url].model
+      : this.app.gameManager.select_char[0].model;
     if (modelAsset) {
       if (!modelAsset.loaded) this.app.assets.load(modelAsset);
       modelInst.model.asset = modelAsset;
