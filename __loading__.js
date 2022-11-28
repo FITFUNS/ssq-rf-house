@@ -175,9 +175,12 @@ pc.script.createLoadingScreen(function (app) {
     app.on("preload:end", function () {
         clearTimeout(timer);
         app.off("preload:progress");
-        window.parent.postMessage({
+        window.parent.postMessage(
+          {
             type: "loaded",
-        });
+          },
+          "*"
+        );
     });
     app.on("preload:progress", setProgress);
     app.on("start", hideSplash);
