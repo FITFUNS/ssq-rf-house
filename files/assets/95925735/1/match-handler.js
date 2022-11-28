@@ -246,7 +246,6 @@ class MatchHandler extends pc.ScriptType {
       );
 
       this.match_owner = data.owner_id;
-      this.match_displayname = data.display_name;
     })();
   }
 
@@ -520,7 +519,6 @@ class MatchHandler extends pc.ScriptType {
     inst.tags.add("player");
     inst.house_owner = playerInfo.house_owner;
     inst.level = playerInfo.level;
-    inst.name_pivot = inst.findByTag("name_pos")[0];
     this.playerMap.set(playerInfo.user_id, inst);
     if (playerInfo.pos) {
       const pos = int2float(playerInfo.pos);
