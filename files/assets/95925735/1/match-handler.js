@@ -221,6 +221,7 @@ class MatchHandler extends pc.ScriptType {
       );
 
       this.match_owner = data.owner_id;
+      this.match_displayname = data.display_name;
     })();
   }
 
