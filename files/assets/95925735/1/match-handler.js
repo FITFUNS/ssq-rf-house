@@ -478,7 +478,8 @@ class MatchHandler extends pc.ScriptType {
 
     if (leaves && leaves.length > 0) {
       leaves.forEach((player) => {
-        player.nameTag.destroy();
+        const playerInst = this.playerMap.get(player.user_id);
+        playerInst.nameTag.destroy();
         this.destroyPlayer(player.user_id);
       });
     }
