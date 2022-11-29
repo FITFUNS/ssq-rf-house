@@ -293,7 +293,7 @@ class MatchHandler extends pc.ScriptType {
     })();
   }
 
-  onHouseChannelPresence() {}
+  onHouseChannelPresence() { }
 
   onPackMessage(match_id, op_code, data, presence, match) {
     for (const matchData of data) {

@@ -45,7 +45,7 @@ class InputManager extends pc.ScriptType {
     raycastResults = raycastResults.filter(
       (result) =>
         result.point.distance(this.app.matchHandler.localPlayer.getPosition()) <
-          20 && !result.entity.tags.has("prevent_raycast") && !result.entity.tags.has("house_item")
+        20 && !result.entity.tags.has("prevent_raycast") && !result.entity.tags.has("house_item")
     );
     if (raycastResults[0] && raycastResults[0].entity.tags.has("self"))
       raycastResults.splice(0, 1);
@@ -90,8 +90,8 @@ class InputManager extends pc.ScriptType {
         && (this.inputTarget.name === raycastResult.entity.setter
           || this.inputTarget.name === this.ownerId)
       ) {
-          const uiPivot = raycastResult.entity.findByTag("ui_pivot")[0];
-          const uiPosition = this._raycastCamera.worldToScreen(
+        const uiPivot = raycastResult.entity.findByTag("ui_pivot")[0];
+        const uiPosition = this._raycastCamera.worldToScreen(
           uiPivot.getPosition()
         );
         window.parent.postMessage(
