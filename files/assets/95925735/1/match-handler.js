@@ -173,6 +173,7 @@ class MatchHandler extends pc.ScriptType {
   }
 
   onHouseInit(data) {
+    localStorage.setItem("char_type", data.char_type);
     const matchConfig = data.matchConfig;
     this.name_screen.enabled = true;
     this.nameTag.children[0].element.text = data.display_name;
@@ -293,7 +294,7 @@ class MatchHandler extends pc.ScriptType {
     })();
   }
 
-  onHouseChannelPresence() { }
+  onHouseChannelPresence() {}
 
   onPackMessage(match_id, op_code, data, presence, match) {
     for (const matchData of data) {
@@ -316,7 +317,10 @@ class MatchHandler extends pc.ScriptType {
     setTimeout(async () => {
       const account = await this.nakamaMatch.Account.get();
       const metadata = JSON.parse(account.user.metadata);
-      const char_type = getRandomInt(0, 5);
+      const char_type =
+        localStorage.getItem("char_type") !== "null"
+          ? localStorage.getItem("char_type")
+          : getRandomInt(0, 5);
       await this.sendMatchState(this.opCode.PLAYER_SPAWN, {
         user_id: account.user_id,
         char_type: char_type,
