@@ -2,7 +2,7 @@ ASSET_PREFIX = "";
 SCRIPT_PREFIX = "";
 SCENE_PATH = "1488900.json";
 CONTEXT_OPTIONS = {
-    'antialias': true,
+    'antialias': false,
     'alpha': false,
     'preserveDrawingBuffer': false,
     'preferWebGl2': true,
