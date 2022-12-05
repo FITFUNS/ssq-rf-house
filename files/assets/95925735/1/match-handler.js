@@ -326,9 +326,7 @@ class MatchHandler extends pc.ScriptType {
         char_type: char_type,
         level: metadata.level ? metadata.level : 1,
         house_owner: metadata.house_owner ? 1 : 0,
-        display_name: window.btoa(
-          encodeURIComponent(account.user.display_name)
-        ),
+        display_name: account.user.display_name,
       });
     }, 0);
   }
@@ -483,7 +481,7 @@ class MatchHandler extends pc.ScriptType {
     if (leaves && leaves.length > 0) {
       leaves.forEach((player) => {
         const playerInst = this.playerMap.get(player.user_id);
-        playerInst.nameTag.destroy();
+        if (playerInst) playerInst.nameTag.destroy();
         this.destroyPlayer(player.user_id);
       });
     }
@@ -519,9 +517,8 @@ class MatchHandler extends pc.ScriptType {
     }
     inst.addChild(modelInst);
     inst.name = playerInfo.user_id;
-    inst.display_name = decodeURIComponent(
-      window.atob(playerInfo.display_name)
-    );
+    inst.display_name = playerInfo.display_name;
+
     inst.tags.add("player");
     inst.house_owner = playerInfo.house_owner;
     inst.level = playerInfo.level;
