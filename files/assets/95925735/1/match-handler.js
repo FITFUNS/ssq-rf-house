@@ -171,84 +171,88 @@ class MatchHandler extends pc.ScriptType {
         break;
     }
   }
+  async joinMatch(config, data) {
+    const matchs = config.scenes[this.matchName];
+    let serverkey = "";
+    let host = "";
+    let port = "";
+    let useSSL = false;
+    let verbose = false;
+    let protobuf = false;
+    for (const match of matchs) {
+      serverkey = config.servers[match].serverkey;
+      host = config.servers[match].host;
+      port = config.servers[match].port;
+      useSSL = port.indexOf("443") > -1 ? true : false;
+      protobuf = true;
 
-  onHouseInit(data) {
+      const drv = new ffnet.NetDriver();
+      const cid = data.custom_id;
+      const username = data.username;
+      drv.initialize(
+        this.app,
+        {
+          host: host,
+          port: port,
+          serverkey: serverkey,
+          useSSL: useSSL,
+        },
+        "match"
+      );
+      if (
+        !(await drv.authenticate(
+          { cid: cid, session_key: data.session_key },
+          true,
+          username
+        ))
+      )
+        continue;
+      if (!(await drv.connect(useSSL, verbose, protobuf))) continue;
+
+      const searchResult = await drv.gameplay.createMatch(
+        "create_match",
+        JSON.stringify({
+          handler: this.matchName,
+          owner_id: data.owner_id,
+          query: "+label.handler:" + data.owner_id,
+        })
+      );
+      const parsed = JSON.parse(searchResult);
+      this.match_id = parsed.match_id;
+      this.nakamaMatch = window.nakamaMatch = drv;
+      break;
+    }
+    if (!this.match_id) {
+      await this.joinMatch(config, data);
+      return;
+    }
+    await this.nakamaMatch.gameplay.joinMatch(
+      this.match_id,
+      this.onMatchData,
+      this.onMatchPresence,
+      this
+    );
+
+    this.nakamaMatch.social.joinRoom(
+      data.owner_id,
+      true,
+      false,
+      this.onHouseChannelMessage,
+      this.onHouseChannelPresence,
+      this
+    );
+
+    this.match_owner = data.owner_id;
+    this.match_displayname = data.display_name;
+  }
+
+  async onHouseInit(data) {
     localStorage.setItem("char_type", data.char_type);
-    const matchConfig = data.matchConfig;
     this.name_screen.enabled = true;
     this.nameTag.children[0].element.text = data.display_name;
     this.nameTag.element.width = this.nameTag.children[0].element.width + 36;
-    (async () => {
-      const matchs = matchConfig.scenes[this.matchName];
-      let serverkey = "";
-      let host = "";
-      let port = "";
-      let useSSL = false;
-      let verbose = false;
-      let protobuf = false;
-      for (const match of matchs) {
-        serverkey = matchConfig.servers[match].serverkey;
-        host = matchConfig.servers[match].host;
-        port = matchConfig.servers[match].port;
-        useSSL = port.indexOf("443") > -1 ? true : false;
-        protobuf = true;
-
-        const drv = new ffnet.NetDriver();
-        const cid = data.custom_id;
-        const username = data.username;
-        drv.initialize(
-          this.app,
-          {
-            host: host,
-            port: port,
-            serverkey: serverkey,
-            useSSL: useSSL,
-          },
-          "match"
-        );
-        if (
-          !(await drv.authenticate(
-            { cid: cid, session_key: data.session_key },
-            true,
-            username
-          ))
-        )
-          continue;
-        if (!(await drv.connect(useSSL, verbose, protobuf))) continue;
-
-        const searchResult = await drv.gameplay.createMatch(
-          "create_match",
-          JSON.stringify({
-            handler: this.matchName,
-            owner_id: data.owner_id,
-            query: "+label.handler:" + data.owner_id,
-          })
-        );
-        const parsed = JSON.parse(searchResult);
-        this.match_id = parsed.match_id;
-        this.nakamaMatch = window.nakamaMatch = drv;
-        break;
-      }
-
-      await this.nakamaMatch.gameplay.joinMatch(
-        this.match_id,
-        this.onMatchData,
-        this.onMatchPresence,
-        this
-      );
-
-      this.nakamaMatch.social.joinRoom(
-        data.owner_id,
-        true,
-        false,
-        this.onHouseChannelMessage,
-        this.onHouseChannelPresence,
-        this
-      );
-
-      this.match_owner = data.owner_id;
-      this.match_displayname = data.display_name;
-    })();
+    const matchConfig = data.matchConfig;
+    await this.joinMatch(matchConfig, data);
   }
 
   onHouseChat(data) {
