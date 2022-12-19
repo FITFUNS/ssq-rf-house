@@ -223,7 +223,7 @@ class MatchHandler extends pc.ScriptType {
       break;
     }
     if (!this.match_id) {
-      return false
+      return false;
     }
     await this.nakamaMatch.gameplay.joinMatch(
       this.match_id,
@@ -256,11 +256,12 @@ class MatchHandler extends pc.ScriptType {
       let response = false;
       response = await this.joinMatch(matchConfig, data);
 
-      if(!response) setTimeout(() => {
-        joinRequest(data)
-      }, 1000);
-    }
-    }
+      if (!response)
+        setTimeout(() => {
+          joinRequest(data);
+        }, 1000);
+    };
+    joinRequest(data);
   }
 
   onHouseChat(data) {
