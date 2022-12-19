@@ -223,8 +223,7 @@ class MatchHandler extends pc.ScriptType {
       break;
     }
     if (!this.match_id) {
-      await this.joinMatch(config, data);
-      return;
+      return false
     }
     await this.nakamaMatch.gameplay.joinMatch(
       this.match_id,
@@ -244,15 +243,24 @@ class MatchHandler extends pc.ScriptType {
 
     this.match_owner = data.owner_id;
     this.match_displayname = data.display_name;
+    return true;
   }
 
-  async onHouseInit(data) {
+  onHouseInit(data) {
     localStorage.setItem("char_type", data.char_type);
     this.name_screen.enabled = true;
     this.nameTag.children[0].element.text = data.display_name;
     this.nameTag.element.width = this.nameTag.children[0].element.width + 36;
-    const matchConfig = data.matchConfig;
-    await this.joinMatch(matchConfig, data);
+    const joinRequest = async (data) => {
+      const matchConfig = data.matchConfig;
+      let response = false;
+      response = await this.joinMatch(matchConfig, data);
+
+      if(!response) setTimeout(() => {
+        joinRequest(data)
+      }, 1000);
+    }
+    }
   }
 
   onHouseChat(data) {
